@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daily Ads Checklist</title>
+<style>
+  :root{
+    --meta-color:#4C6FFF;
+    --tiktok-color:#FF2E63;
+    --content-color:#00C2A8;
+    --bg:#FFF8F0;
+    --card:#FFFFFF;
+    --ink:#22223B;
+    --muted:#8D8D9E;
+    --shadow: 0 6px 16px rgba(34,34,59,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color:var(--ink);
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  header{
+    text-align:center;
+    margin-bottom:24px;
+  }
+  header h1{
+    font-size:1.8rem;
+    margin:0 0 4px;
+    background: linear-gradient(90deg, var(--meta-color), var(--tiktok-color), var(--content-color));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:800;
+  }
+  header p{color:var(--muted); margin:0; font-size:0.95rem;}
+
+  .progress-wrap{
+    background:var(--card);
+    border-radius:16px;
+    padding:14px 18px;
+    box-shadow:var(--shadow);
+    margin-bottom:22px;
+  }
+  .progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.85rem;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .progress-bar{
+    height:12px;
+    background:#eee;
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    border-radius:8px;
+    background: linear-gradient(90deg, var(--meta-color), var(--tiktok-color), var(--content-color));
+    transition: width 0.4s ease;
+  }
+
+  .pic-manager{
+    background:var(--card);
+    border-radius:16px;
+    padding:14px 16px;
+    box-shadow:var(--shadow);
+    margin-bottom:22px;
+  }
+  .pic-manager-title{
+    font-weight:700;
+    font-size:1rem;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .pic-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .pic-chips:empty{margin-bottom:0;}
+  .pic-chip{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    background:#f2f2f7;
+    border-radius:20px;
+    padding:2px 4px 2px 12px;
+  }
+  .pic-chip .pic-name-input{
+    border:none;
+    background:transparent;
+    font-size:0.85rem;
+    font-family:inherit;
+    color:var(--ink);
+    width:96px;
+    padding:5px 0;
+  }
+  .pic-chip .pic-name-input:focus{outline:none;}
+  .pic-chip .pic-remove{
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:0.75rem;
+    border-radius:50%;
+    width:20px;
+    height:20px;
+    line-height:1;
+  }
+  .pic-chip .pic-remove:hover{background:#e74c3c;color:#fff;}
+  .pic-add-row{padding:0;}
+  .pic-add-row button{background:var(--meta-color);}
+
+  .category{
+    background:var(--card);
+    border-radius:16px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    border-top: 6px solid var(--cat-color);
+  }
+  .category-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    cursor:pointer;
+  }
+  .category-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:700;
+    font-size:1.05rem;
+  }
+  .category-title .emoji{font-size:1.3rem;}
+  .cat-count{
+    font-size:0.8rem;
+    color:var(--muted);
+    background:#f2f2f7;
+    padding:3px 10px;
+    border-radius:20px;
+  }
+  .task-list{
+    padding: 0 16px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .task{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#faf9fb;
+    border-radius:10px;
+    padding:10px 12px;
+    transition: background 0.2s;
+  }
+  .task.done{
+    background:#f0fdf8;
+  }
+  .task input[type=checkbox]{
+    width:20px;height:20px;
+    accent-color: var(--cat-color);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .task span{
+    flex:1;
+    font-size:0.95rem;
+  }
+  .task.done span{
+    text-decoration:line-through;
+    color:var(--muted);
+  }
+  .task select.pic-select{
+    border:1px solid #e2e2ea;
+    background:#fff;
+    color:var(--ink);
+    border-radius:8px;
+    padding:5px 8px;
+    font-size:0.8rem;
+    font-family:inherit;
+    cursor:pointer;
+    max-width:130px;
+    flex-shrink:0;
+  }
+  .task select.pic-select.assigned{
+    border-color:var(--cat-color);
+    color:var(--cat-color);
+    font-weight:600;
+  }
+  .task select.pic-select:focus{
+    outline:2px solid var(--cat-color);
+    outline-offset:1px;
+  }
+  .task button{
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:1rem;
+    padding:2px 6px;
+    border-radius:6px;
+  }
+  .task button:hover{background:#eee;color:#e74c3c;}
+
+  .add-row{
+    display:flex;
+    gap:8px;
+    padding: 6px 16px 16px;
+  }
+  .add-row input{
+    flex:1;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-size:0.9rem;
+  }
+  .add-row button{
+    background:var(--cat-color);
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:8px 14px;
+    font-weight:600;
+    cursor:pointer;
+    font-size:0.85rem;
+  }
+  .add-row button:hover{opacity:0.9;}
+
+  .footer-actions{
+    text-align:center;
+    margin-top:10px;
+  }
+  .reset-btn{
+    background:none;
+    border:1px solid #ddd;
+    color:var(--muted);
+    padding:8px 18px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:0.85rem;
+  }
+  .reset-btn:hover{background:#f2f2f7;}
+
+  .confetti-msg{
+    text-align:center;
+    font-weight:700;
+    color:var(--content-color);
+    margin:14px 0 0;
+    font-size:0.95rem;
+    min-height:1.2em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🚀 Daily Ads Checklist</h1>
+    <p>Meta • TikTok • Content — keep the machine running</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">0 of 0 tasks done</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="pic-manager" id="pic-manager"></div>
+
+  <div id="categories"></div>
+
+  <div class="confetti-msg" id="confetti-msg"></div>
+
+  <div class="footer-actions">
+    <button class="reset-btn" id="reset-btn">🔄 Reset day</button>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  {
+    id: 'meta',
+    name: 'Meta Ads',
+    emoji: '📘',
+    color: 'var(--meta-color)',
+    defaultTasks: [
+      'Check ad account spend & pacing',
+      'Review campaign performance (CPA/ROAS)',
+      'Check for disapprovals or flagged ads',
+      'Optimize/turn off underperforming ad sets',
+      'Check frequency & audience fatigue'
+    ]
+  },
+  {
+    id: 'tiktok',
+    name: 'TikTok Ads',
+    emoji: '🎵',
+    color: 'var(--tiktok-color)',
+    defaultTasks: [
+      'Check ad account spend & pacing',
+      'Review campaign performance (CPA/ROAS)',
+      'Check ad review status',
+      'Refresh creatives if CTR is dropping',
+      'Check TikTok Pixel/events health'
+    ]
+  },
+  {
+    id: 'content',
+    name: 'Content',
+    emoji: '🎬',
+    color: 'var(--content-color)',
+    defaultTasks: [
+      'Review new creative submissions',
+      'Brief new ad creative/UGC needs',
+      'Check top performing hooks/angles',
+      'Coordinate with creative team on next batch'
+    ]
+  }
+];
+
+const STORAGE_KEY = 'daily-ads-checklist-state';
+
+// Daftar PIC (Person In Charge) — ganti dengan nama tim kamu
+const PICS = ['Andi', 'Budi', 'Citra', 'Dina'];
+
+let state = null;
+
+function todayStr(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function defaultState(){
+  const tasks = {};
+  CATEGORIES.forEach(cat=>{
+    tasks[cat.id] = cat.defaultTasks.map((text,i)=>({
+      id: cat.id + '-' + i + '-' + Date.now(),
+      text,
+      done:false,
+      pic:''
+    }));
+  });
+  return { date: todayStr(), tasks, pics: [...PICS] };
+}
+
+function loadState(){
+  try{
+    const value = localStorage.getItem(STORAGE_KEY);
+    if(value){
+      const parsed = JSON.parse(value);
+      if(parsed.date === todayStr()){
+        state = parsed;
+        if(!Array.isArray(state.pics)) state.pics = [...PICS];
+      } else {
+        state = defaultState();
+        saveState();
+      }
+    } else {
+      state = defaultState();
+      saveState();
+    }
+  } catch(e){
+    state = defaultState();
+    try{ saveState(); }catch(e2){}
+  }
+  render();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e){
+    console.error('Save failed', e);
+  }
+}
+
+function render(){
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  let total = 0, done = 0;
+
+  CATEGORIES.forEach(cat=>{
+    const tasks = state.tasks[cat.id] || [];
+    total += tasks.length;
+    done += tasks.filter(t=>t.done).length;
+
+    const catEl = document.createElement('div');
+    catEl.className = 'category';
+    catEl.style.setProperty('--cat-color', cat.color);
+
+    const doneCount = tasks.filter(t=>t.done).length;
+
+    catEl.innerHTML = `
+      <div class="category-header">
+        <div class="category-title"><span class="emoji">${cat.emoji}</span> ${cat.name}</div>
+        <div class="cat-count">${doneCount}/${tasks.length}</div>
+      </div>
+      <div class="task-list">
+        ${tasks.map(t => `
+          <div class="task ${t.done?'done':''}" data-id="${t.id}" data-cat="${cat.id}">
+            <input type="checkbox" ${t.done?'checked':''} />
+            <span>${escapeHtml(t.text)}</span>
+            <select class="pic-select ${t.pic?'assigned':''}" title="Assign PIC" data-pic-id="${t.id}" data-cat="${cat.id}">
+              <option value="" ${!t.pic?'selected':''}>👤 PIC</option>
+              ${state.pics.map(p => `<option value="${escapeHtml(p)}" ${t.pic===p?'selected':''}>${escapeHtml(p)}</option>`).join('')}
+            </select>
+            <button title="Remove" data-remove="${t.id}" data-cat="${cat.id}">✕</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="add-row">
+        <input type="text" placeholder="Add a task..." data-cat-input="${cat.id}" />
+        <button data-cat-add="${cat.id}">Add</button>
+      </div>
+    `;
+    container.appendChild(catEl);
+  });
+
+  document.getElementById('progress-text').textContent = `${done} of ${total} tasks done`;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const msgEl = document.getElementById('confetti-msg');
+  if(total > 0 && done === total){
+    msgEl.textContent = '🎉 All done! You crushed it today.';
+  } else {
+    msgEl.textContent = '';
+  }
+
+  renderPicManager();
+  attachHandlers();
+}
+
+function renderPicManager(){
+  const el = document.getElementById('pic-manager');
+  el.innerHTML = `
+    <div class="pic-manager-title">👥 Kelola PIC</div>
+    <div class="pic-chips">
+      ${state.pics.map((p,i) => `
+        <div class="pic-chip">
+          <input type="text" class="pic-name-input" data-pic-index="${i}" value="${escapeAttr(p)}" />
+          <button class="pic-remove" title="Hapus PIC" data-pic-remove="${i}">✕</button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="add-row pic-add-row">
+      <input type="text" id="new-pic-input" placeholder="Tambah nama PIC..." />
+      <button id="new-pic-add">Tambah</button>
+    </div>
+  `;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escapeAttr(str){
+  return escapeHtml(str).replace(/"/g, '&quot;');
+}
+
+function attachHandlers(){
+  document.querySelectorAll('.task input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', async (e)=>{
+      const taskEl = e.target.closest('.task');
+      const id = taskEl.dataset.id;
+      const cat = taskEl.dataset.cat;
+      const task = state.tasks[cat].find(t=>t.id===id);
+      if(task){
+        task.done = e.target.checked;
+        await saveState();
+        render();
+      }
+    });
+  });
+
+  document.querySelectorAll('.pic-name-input').forEach(input=>{
+    input.addEventListener('change', (e)=>{
+      const idx = +e.target.dataset.picIndex;
+      const oldName = state.pics[idx];
+      const newName = e.target.value.trim();
+      if(!newName || newName === oldName){
+        e.target.value = oldName;
+        return;
+      }
+      if(state.pics.includes(newName)){
+        alert('Nama PIC "' + newName + '" sudah ada.');
+        e.target.value = oldName;
+        return;
+      }
+      Object.values(state.tasks).forEach(list=>
+        list.forEach(t=>{ if(t.pic === oldName) t.pic = newName; }));
+      state.pics[idx] = newName;
+      saveState();
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-pic-remove]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const idx = +e.target.dataset.picRemove;
+      const removed = state.pics[idx];
+      state.pics.splice(idx, 1);
+      Object.values(state.tasks).forEach(list=>
+        list.forEach(t=>{ if(t.pic === removed) t.pic = ''; }));
+      saveState();
+      render();
+    });
+  });
+
+  const newPicAdd = document.getElementById('new-pic-add');
+  const newPicInput = document.getElementById('new-pic-input');
+  if(newPicAdd && newPicInput){
+    const addPic = ()=>{
+      const name = newPicInput.value.trim();
+      if(!name) return;
+      if(state.pics.includes(name)){
+        alert('Nama PIC "' + name + '" sudah ada.');
+        return;
+      }
+      state.pics.push(name);
+      newPicInput.value = '';
+      saveState();
+      render();
+    };
+    newPicAdd.addEventListener('click', addPic);
+    newPicInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') addPic(); });
+  }
+
+  document.querySelectorAll('.pic-select').forEach(sel=>{
+    sel.addEventListener('change', async (e)=>{
+      const id = e.target.dataset.picId;
+      const cat = e.target.dataset.cat;
+      const task = state.tasks[cat].find(t=>t.id===id);
+      if(task){
+        task.pic = e.target.value;
+        await saveState();
+        render();
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const id = e.target.dataset.remove;
+      const cat = e.target.dataset.cat;
+      state.tasks[cat] = state.tasks[cat].filter(t=>t.id!==id);
+      await saveState();
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-cat-add]').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      const cat = e.target.dataset.catAdd;
+      const input = document.querySelector(`[data-cat-input="${cat}"]`);
+      const text = input.value.trim();
+      if(text){
+        state.tasks[cat].push({ id: cat+'-'+Date.now(), text, done:false, pic:'' });
+        input.value = '';
+        await saveState();
+        render();
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-cat-input]').forEach(input=>{
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        const cat = input.dataset.catInput;
+        document.querySelector(`[data-cat-add="${cat}"]`).click();
+      }
+    });
+  });
+}
+
+document.getElementById('reset-btn').addEventListener('click', async ()=>{
+  state = defaultState();
+  await saveState();
+  render();
+});
+
+loadState();
+</script>
+</body>
+</html>
