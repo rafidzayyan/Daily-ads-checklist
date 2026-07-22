@@ -8,8 +8,8 @@ A lightweight, single-file checklist app for daily ads operations across **Meta*
 - 👥 Manage PICs (add / rename / remove) and assign them per task
 - 📊 Live progress bar with completion percentage
 - ➕ Add or remove tasks on the fly
-- 🔄 One-click "Reset day" — checklist auto-resets each new day
-- 💾 State persisted in `localStorage` (per browser)
+- 🔄 One-click "Reset day" — clears the checklist back to defaults (manual only)
+- 💾 State persisted in `localStorage` (per browser) — tasks, checkbox state, and PIC assignments survive refresh and reopening the browser, and are never auto-cleared
 
 ## Tech
 
